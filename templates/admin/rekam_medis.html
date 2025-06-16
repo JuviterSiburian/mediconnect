@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekam Medis | Klinik Sehat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .sidebar-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .record-item:hover {
+            background-color: #f3f4f6;
+            transform: translateX(3px);
+            transition: all 0.2s ease;
+        }
+        
+        .record-item.active {
+            background-color: #e0f2fe;
+            border-left: 3px solid #3b82f6;
+        }
+        
+        .attachment-item:hover {
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="hidden lg:flex lg:flex-shrink-0">
+            <div class="flex flex-col w-64 bg-blue-800">
+                <div class="flex items-center justify-center h-16 px-4 bg-blue-900">
+                    <div class="flex items-center">
+                        <i class="fas fa-heartbeat text-white text-2xl mr-2"></i>
+                        <span class="text-white font-semibold text-xl">Klinik Sehat</span>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-grow px-4 py-8 overflow-y-auto">
+                    <div class="flex items-center px-4 py-3 mb-6 bg-blue-700 rounded-lg">
+                        <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                            {{ current_user.username|first|upper }}
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-white">Dr. {{ current_user.username }}</p>
+                            <p class="text-xs font-light text-blue-200">Dokter Umum</p>
+                        </div>
+                    </div>
+                    
+                    <nav class="flex-1 space-y-2">
+                        <a href="{{ url_for('admin_dashboard') }}" class="flex items-center px-4 py-3 text-sm font-medium text-white rounded-lg sidebar-item">
+                            <i class="fas fa-tachometer-alt mr-3"></i>
+                            Dashboard
+                        </a>
+                        <a href="{{ url_for('dokter_daftar_janji') }}" class="flex items-center px-4 py-3 text-sm font-medium text-white rounded-lg sidebar-item">
+                            <i class="far fa-calendar-check mr-3"></i>
+                            Jadwal Praktik
+                        </a>
+                        <a href="{{ url_for('rekam_medis') }}" class="flex items-center px-4 py-3 text-sm font-medium text-white rounded-lg sidebar-item active">
+                            <i class="fas fa-notes-medical mr-3"></i>
+                            Rekam Medis
+                        </a>
+                        <a href="{{ url_for('logout') }}" class="flex items-center px-4 py-3 text-sm font-medium text-blue-200 rounded-lg sidebar-item hover:text-white">
+                            <i class="fas fa-sign-out-alt mr-3"></i>
+                            Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!-- Mobile header -->
+            <header class="lg:hidden flex items-center justify-between px-4 py-3 bg-blue-800 border-b border-blue-700">
+                <div class="flex items-center">
+                    <i class="fas fa-heartbeat text-white text-xl mr-2"></i>
+                    <span class="text-white font-semibold">Klinik Sehat</span>
+                </div>
+                <button class="text-white focus:outline-none">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </header>
+            
+            <!-- Main content area -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-2xl font-bold text-gray-800">Rekam Medis Pasien</h1>
+                    <div class="flex items-center">
+                        <span class="text-gray-600 mr-2 hidden md:inline">Selamat datang,</span>
+                        <span class="font-medium text-blue-600">Dr. {{ current_user.username }}</span>
+                        <div class="ml-3 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                            {{ current_user.username|first|upper }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Records List -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden lg:col-span-1">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-lg font-semibold text-gray-800">Daftar Rekam Medis</h2>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                    {{ records|length }} records
+                                </span>
+                            </div>
+                        </div>
+                        <div class="overflow-y-auto" style="max-height: 500px;">
+                            <ul class="divide-y divide-gray-200">
+                                {% for record in records %}
+                                <li class="record-item {% if selected_record and record.id == selected_record.id %}active{% endif %}">
+                                    <a href="{{ url_for('rekam_medis', record_id=record.id) }}" class="block px-6 py-4 hover:bg-gray-50">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                                <i class="fas fa-file-medical"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    RM-{{ record.id }} - {{ record.patient.username }}
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ record.created_at.strftime('%d %b %Y') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Record Details -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden lg:col-span-2">
+                        {% if selected_record %}
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-800">Detail Rekam Medis</h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-500">Pasien</h3>
+                                    <div class="flex items-center mt-1">
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                            {{ patient.username|first|upper }}
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">{{ patient.username }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-500">Dokter</h3>
+                                    <div class="flex items-center mt-1">
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                            {{ selected_record.doctor.username|first|upper }}
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Dr. {{ selected_record.doctor.username }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-500">Tanggal Dibuat</h3>
+                                    <p class="mt-1 text-sm text-gray-900">
+                                        {{ selected_record.created_at.strftime('%d %B %Y %H:%M') }}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-8">
+                                <h3 class="text-sm font-medium text-gray-500">Diagnosis</h3>
+                                <div class="mt-2 p-4 bg-gray-50 rounded-lg">
+                                    <p class="text-gray-900">{{ selected_record.diagnosis }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-8">
+                                <h3 class="text-sm font-medium text-gray-500">Pengobatan</h3>
+                                <div class="mt-2 p-4 bg-gray-50 rounded-lg">
+                                    <p class="text-gray-900">{{ selected_record.treatment }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-8">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-sm font-medium text-gray-500">Lampiran</h3>
+                                    <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                                        {{ attachments|length }} files
+                                    </span>
+                                </div>
+                                
+                                {% if attachments %}
+                                <ul class="divide-y divide-gray-200 border border-gray-200 rounded-lg">
+                                    {% for attach in attachments %}
+                                    <li class="attachment-item px-4 py-3 hover:bg-gray-50">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center">
+                                                <i class="fas fa-paperclip text-gray-400 mr-3"></i>
+                                                <span class="text-sm font-medium text-gray-900 truncate" style="max-width: 200px;">
+                                                    {{ attach.filename }}
+                                                </span>
+                                            </div>
+                                            <a href="{{ attach.filename }}" 
+                                               class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                               download>
+                                                <i class="fas fa-download mr-1"></i> Unduh
+                                            </a>
+                                        </div>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <div class="text-center py-4 text-gray-500">
+                                    <i class="fas fa-paperclip text-2xl mb-2"></i>
+                                    <p>Tidak ada lampiran</p>
+                                </div>
+                                {% endif %}
+                                
+                                <form action="{{ url_for('upload_lampiran', record_id=selected_record.id) }}" method="POST" enctype="multipart/form-data" class="mt-6">
+                                    <div class="flex items-center">
+                                        <label class="block">
+                                            <span class="sr-only">Upload Lampiran</span>
+                                            <input type="file" name="lampiran" 
+                                                   class="block w-full text-sm text-gray-500
+                                                          file:mr-4 file:py-2 file:px-4
+                                                          file:rounded-md file:border-0
+                                                          file:text-sm file:font-semibold
+                                                          file:bg-blue-50 file:text-blue-700
+                                                          hover:file:bg-blue-100" required>
+                                        </label>
+                                        <button type="submit" class="ml-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                            <i class="fas fa-upload mr-1"></i> Upload
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="p-8 text-center">
+                            <i class="fas fa-file-medical-alt text-4xl text-gray-300 mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-500">Pilih rekam medis</h3>
+                            <p class="mt-2 text-gray-400">Pilih salah satu rekam medis dari daftar untuk melihat detail</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Add New Record Form -->
+                <div class="mt-8 bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-800">Tambah Rekam Medis Baru</h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="POST" action="{{ url_for('rekam_medis') }}">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="patient_id" class="block text-sm font-medium text-gray-700 mb-1">Pasien</label>
+                                    <select name="patient_id" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                                        {% for pasien in patients %}
+                                        <option value="{{ pasien.id }}">{{ pasien.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label for="diagnosis" class="block text-sm font-medium text-gray-700 mb-1">Diagnosis</label>
+                                    <input type="text" name="diagnosis" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label for="treatment" class="block text-sm font-medium text-gray-700 mb-1">Pengobatan</label>
+                                    <textarea name="treatment" rows="4" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center">
+                                    <i class="fas fa-plus-circle mr-2"></i> Tambah Rekam Medis
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

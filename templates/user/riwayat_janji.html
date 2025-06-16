@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Janji - Klinik Sehat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation (unchanged) -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-heartbeat text-2xl text-blue-600 mr-2"></i>
+                        <span class="text-xl font-bold text-gray-800">Klinik Sehat</span>
+                    </div>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:items-center space-x-4">
+                    <a href="{{ url_for('user_dashboard') }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-600">Dashboard</a>
+                    <a href="{{ url_for('buat_janji') }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-600">Buat Janji</a>
+                    <a href="{{ url_for('riwayat_janji') }}" class="px-3 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600">Riwayat Janji</a>
+                    <a href="{{ url_for('halaman_medis') }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-600">Rekam Medis</a>
+                    <a href="{{ url_for('logout') }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-600">Logout</a>
+                </div>
+                <div class="flex items-center md:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Modern Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-history text-blue-500 mr-3"></i>
+                    Riwayat Janji Temu
+                </h1>
+                <p class="text-gray-500 mt-1">Daftar lengkap janji temu Anda</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <div class="relative">
+                    <input type="text" placeholder="Cari janji..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointment Cards -->
+        <div class="space-y-4">
+            {% for appointment in appointments %}
+            <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover transition duration-300">
+                <div class="p-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <!-- Left Side -->
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0 bg-blue-50 p-3 rounded-lg">
+                                <i class="fas fa-calendar-check text-blue-500 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-800">
+                                    Janji dengan Dr. {{ appointment.doctor.username }}
+                                </h3>
+                                <div class="flex items-center text-sm text-gray-500 mt-1">
+                                    <i class="far fa-clock mr-2"></i>
+                                    <span>{{ appointment.appointment_time.strftime('%A, %d %B %Y • %H:%M') }}</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-2">
+                                    {{ appointment.notes|truncate(100) if appointment.notes else 'Tidak ada catatan' }}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Side -->
+                        <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                            <span class="status-badge rounded-full 
+                                {% if appointment.status == 'approved' %}bg-green-100 text-green-800
+                                {% elif appointment.status == 'rejected' %}bg-red-100 text-red-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ appointment.status|capitalize }}
+                            </span>
+                            
+                            <a href="#" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition">
+                                <i class="fas fa-eye mr-2 text-blue-500"></i> Detail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="bg-white rounded-xl shadow-md overflow-hidden text-center py-12">
+                <i class="fas fa-calendar-times text-4xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-500">Belum ada riwayat janji temu</h3>
+                <p class="text-gray-400 mt-1">Anda belum memiliki janji temu yang tercatat</p>
+                <a href="{{ url_for('buat_janji') }}" class="inline-flex items-center px-4 py-2 mt-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
+                    <i class="fas fa-plus mr-2"></i> Buat Janji Baru
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if appointments %}
+        <div class="flex justify-center mt-8">
+            <nav class="inline-flex rounded-md shadow">
+                <a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-blue-600 font-medium">
+                    1
+                </a>
+                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                    2
+                </a>
+                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                    3
+                </a>
+                <a href="#" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Add any necessary JavaScript here
+        document.addEventListener('DOMContentLoaded', function() {
+            // You can add interactive elements here
+        });
+    </script>
+</body>
+</html>

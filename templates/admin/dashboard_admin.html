@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Dokter | Klinik Sehat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .sidebar-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="hidden lg:flex lg:flex-shrink-0">
+            <div class="flex flex-col w-64 bg-blue-800">
+                <div class="flex items-center justify-center h-16 px-4 bg-blue-900">
+                    <div class="flex items-center">
+                        <i class="fas fa-heartbeat text-white text-2xl mr-2"></i>
+                        <span class="text-white font-semibold text-xl">Klinik Sehat</span>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-grow px-4 py-8 overflow-y-auto">
+                    <div class="flex items-center px-4 py-3 mb-6 bg-blue-700 rounded-lg">
+                        <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                            {{ current_user.username|first|upper }}
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-white">Dr. {{ current_user.username }}</p>
+                            <p class="text-xs font-light text-blue-200">Dokter Umum</p>
+                        </div>
+                    </div>
+                    
+                    <nav class="flex-1 space-y-2">
+                        <a href="{{ url_for('admin_dashboard') }}" class="flex items-center px-4 py-3 text-sm font-medium text-white rounded-lg sidebar-item active">
+                            <i class="fas fa-tachometer-alt mr-3"></i>
+                            Dashboard
+                        </a>
+                        <a href="{{ url_for('dokter_daftar_janji') }}" class="flex items-center px-4 py-3 text-sm font-medium text-white rounded-lg sidebar-item">
+                            <i class="far fa-calendar-check mr-3"></i>
+                            Jadwal Praktik
+                        </a>
+                        <a href="{{ url_for('rekam_medis') }}" class="flex items-center px-4 py-3 text-sm font-medium text-white rounded-lg sidebar-item">
+                            <i class="fas fa-notes-medical mr-3"></i>
+                            Rekam Medis
+                        </a>
+                        <a href="{{ url_for('logout') }}" class="flex items-center px-4 py-3 text-sm font-medium text-blue-200 rounded-lg sidebar-item hover:text-white">
+                            <i class="fas fa-sign-out-alt mr-3"></i>
+                            Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!-- Mobile header -->
+            <header class="lg:hidden flex items-center justify-between px-4 py-3 bg-blue-800 border-b border-blue-700">
+                <div class="flex items-center">
+                    <i class="fas fa-heartbeat text-white text-xl mr-2"></i>
+                    <span class="text-white font-semibold">Klinik Sehat</span>
+                </div>
+                <button class="text-white focus:outline-none">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </header>
+            
+            <!-- Main content area -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-2xl font-bold text-gray-800">Dashboard Dokter</h1>
+                    <div class="flex items-center">
+                        <span class="text-gray-600 mr-2 hidden md:inline">Selamat datang,</span>
+                        <span class="font-medium text-blue-600">Dr. {{ current_user.username }}</span>
+                        <div class="ml-3 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                            {{ current_user.username|first|upper }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Welcome Section -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+                    <div class="md:flex">
+                        <div class="md:flex-shrink-0">
+                            <img class="h-64 w-full object-cover md:w-64" src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Doctor with patient">
+                        </div>
+                        <div class="p-8">
+                            <div class="uppercase tracking-wide text-sm text-blue-600 font-semibold mb-1">Selamat Datang</div>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-4">Sistem Informasi Klinik Sehat</h2>
+                            <p class="mt-2 text-gray-600 mb-4">
+                                Aplikasi Klinik Sehat membantu dokter dalam mengelola jadwal praktik, rekam medis pasien, 
+                                dan menyediakan informasi kesehatan terkini. Dengan antarmuka yang intuitif, 
+                                dokter dapat fokus pada pelayanan kesehatan tanpa terbebani administrasi.
+                            </p>
+                            <div class="flex space-x-4 mt-6">
+                                <a href="{{ url_for('dokter_daftar_janji') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300">
+                                    <i class="far fa-calendar-check mr-2"></i>Lihat Jadwal
+                                </a>
+                                <a href="{{ url_for('rekam_medis') }}" class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition duration-300">
+                                    <i class="fas fa-notes-medical mr-2"></i>Rekam Medis
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekam Medis - Klinik Sehat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .record-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #3b82f6;
+        }
+        .record-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .attachment-badge {
+            transition: all 0.2s ease;
+        }
+        .attachment-badge:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-heartbeat text-2xl text-blue-600 mr-2"></i>
+                        <span class="text-xl font-bold text-gray-800">Klinik Sehat</span>
+                    </div>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:items-center space-x-4">
+                    <a href="{{ url_for('user_dashboard') }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-600">Dashboard</a>
+                    <a href="{{ url_for('buat_janji') }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-600">Buat Janji</a>
+                    <a href="{{ url_for('riwayat_janji') }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-600">Riwayat Janji</a>
+                    <a href="{{ url_for('halaman_medis') }}" class="px-3 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600">Rekam Medis</a>
+                    <a href="{{ url_for('logout') }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-blue-600">Logout</a>
+                </div>
+                <div class="flex items-center md:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-file-medical text-blue-500 mr-3"></i>
+                    Riwayat Rekam Medis
+                </h1>
+                <p class="text-gray-500 mt-1">Daftar lengkap catatan medis Anda</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <div class="relative">
+                    <input type="text" placeholder="Cari rekam medis..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full md:w-64">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Records Section -->
+        {% if records %}
+        <div class="space-y-6">
+            {% for record in records %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden record-card">
+                <div class="p-6">
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between">
+                        <!-- Left Side -->
+                        <div class="flex-1">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-blue-100 p-2 rounded-full mr-4">
+                                    <i class="fas fa-calendar-check text-blue-500"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">{{ record.created_at.strftime('%A, %d %B %Y') }}</h3>
+                                    <p class="text-sm text-gray-500">Dokter: <span class="text-blue-600">{{ record.doctor.name }}</span></p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-500 mb-1">Diagnosa</h4>
+                                    <p class="text-gray-800">{{ record.diagnosis }}</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-500 mb-1">Perawatan</h4>
+                                    <p class="text-gray-800">{{ record.treatment }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Side (Attachments) -->
+                        <div class="mt-4 md:mt-0 md:ml-6">
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">Resep Obat</h4>
+                            {% if record.attachments %}
+                            <div class="flex flex-wrap gap-2">
+                                {% for attach in record.attachments %}
+                                <a href="{{ attach.filename }}" 
+                                   class="attachment-badge inline-flex items-center px-3 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-600 text-sm"
+                                   download>
+                                    <i class="fas fa-file-pdf mr-1"></i>
+                                    {{ attach.filename|truncate(20, True) }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-sm text-gray-400 italic">Tidak ada lampiran</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden text-center py-16">
+            <div class="mx-auto max-w-md px-4">
+                <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-file-medical text-blue-400 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-700">Belum ada rekam medis</h3>
+                <p class="text-gray-500 mt-2">Anda belum memiliki catatan rekam medis</p>
+                <a href="{{ url_for('buat_janji') }}" class="inline-flex items-center px-4 py-2 mt-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
+                    <i class="fas fa-calendar-plus mr-2"></i> Buat Janji Konsultasi
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Pagination -->
+        {% if records %}
+        <div class="flex justify-center mt-8">
+            <nav class="inline-flex rounded-md shadow">
+                <a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-blue-600 font-medium">
+                    1
+                </a>
+                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                    2
+                </a>
+                <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                    3
+                </a>
+                <a href="#" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Simple search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[type="text"]');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const records = document.querySelectorAll('.record-card');
+                
+                records.forEach(record => {
+                    const text = record.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        record.style.display = 'block';
+                    } else {
+                        record.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
