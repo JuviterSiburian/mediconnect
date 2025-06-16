@@ -1,0 +1,9 @@
+flask
+flask-sqlalchemy
+flask-login
+flask-cors
+boto3
+mysqlclient
+gunicorn
+python-dotenv
+pymysql
